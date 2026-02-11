@@ -121,6 +121,12 @@ body {
   transition: background-color var(--transition-base), color var(--transition-base);
   overflow-x: hidden;
   cursor: crosshair;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom Cursor */
