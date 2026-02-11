@@ -93,7 +93,75 @@ class AdminPanel {
     // Load recruitment applications when switching to recruitment tab
     if (tabName === 'recruitment') {
       this.loadApplications();
+      this.loadInterviewSlots();
     }
+  }
+
+  // Interview slot management
+  loadInterviewSlots() {
+    const slots = JSON.parse(localStorage.getItem('interviewSlots')) || [];
+    this.renderInterviewSlots(slots);
+
+    // Attach add slot button
+    const addBtn = document.getElementById('addInterviewSlotBtn');
+    if (addBtn) {
+      addBtn.onclick = (e) => {
+        e.preventDefault();
+        const dateInput = document.getElementById('slotDate');
+        const timeInput = document.getElementById('slotTime');
+        if (!dateInput.value || !timeInput.value) {
+          this.showNotification('Please pick both date and time.', 'error');
+          return;
+        }
+        this.addInterviewSlot(dateInput.value, timeInput.value);
+        dateInput.value = '';
+        timeInput.value = '';
+      };
+    }
+  }
+
+  renderInterviewSlots(slots) {
+    const container = document.getElementById('slotsList');
+    if (!container) return;
+    if (!slots || slots.length === 0) {
+      container.innerHTML = '<p style="margin:0; color: var(--text-secondary);">No slots set yet.</p>';
+      return;
+    }
+
+    const html = slots.map((s, idx) => `
+      <div style="display:flex; justify-content:space-between; gap:0.5rem; align-items:center; padding:0.4rem 0; border-bottom:1px solid var(--border-color);">
+        <div style="color: var(--text-primary); font-weight:600;">${s.date} <span style="color:var(--text-secondary); font-weight:400;">@ ${s.time}</span></div>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn btn-danger btn-sm" onclick="adminPanel.removeInterviewSlot(${idx})">Remove</button>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+  }
+
+  addInterviewSlot(date, time) {
+    const slots = JSON.parse(localStorage.getItem('interviewSlots')) || [];
+    // avoid duplicates
+    if (slots.find(s => s.date === date && s.time === time)) {
+      this.showNotification('This slot already exists.', 'info');
+      return;
+    }
+    slots.push({ date, time });
+    slots.sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+    localStorage.setItem('interviewSlots', JSON.stringify(slots));
+    this.showNotification('✓ Interview slot added.', 'success');
+    this.renderInterviewSlots(slots);
+  }
+
+  removeInterviewSlot(index) {
+    const slots = JSON.parse(localStorage.getItem('interviewSlots')) || [];
+    if (index < 0 || index >= slots.length) return;
+    if (!confirm('Remove this interview slot?')) return;
+    slots.splice(index, 1);
+    localStorage.setItem('interviewSlots', JSON.stringify(slots));
+    this.showNotification('Slot removed.', 'info');
+    this.renderInterviewSlots(slots);
   }
 
   handleAddMember(e) {
@@ -288,6 +356,17 @@ class AdminPanel {
     `).join('');
 
     applicationsContainer.innerHTML = html;
+    // Also render existing bookings (if any)
+    const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+    const bookingsHtml = bookings.length > 0 ? `
+      <div style="margin-top:1rem;">
+        <h4 style="color: var(--text-primary);">Booked Interviews</h4>
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          ${bookings.map(b => `<div style="padding:0.5rem; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-secondary);">${b.email} — ${b.date} @ ${b.time}</div>`).join('')}
+        </div>
+      </div>
+    ` : '';
+    applicationsContainer.insertAdjacentHTML('beforeend', bookingsHtml);
   }
 
   acceptApplication(index, name, email) {

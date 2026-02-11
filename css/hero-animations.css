@@ -44,11 +44,9 @@
 }
 
 .hero-subtitle::after {
-  content: '|';
-  position: absolute;
-  right: -10px;
-  animation: blink 1s step-end infinite;
-  color: var(--accent-primary);
+  /* removed decorative caret to avoid visual clutter */
+  content: '';
+  display: none;
 }
 
 @keyframes fadeInSlideUp {

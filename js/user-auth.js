@@ -213,6 +213,16 @@ class UserAuth {
   }
 
   openUserLogin() {
+    // If an admin is currently logged in, require logout first
+    const current = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if (current && current.role === 'admin') {
+      if (confirm('You are currently logged in as admin. Do you want to logout admin session to open User Login?')) {
+        try { window.authManager && typeof window.authManager.logout === 'function' && window.authManager.logout(); } catch(e){}
+      } else {
+        return;
+      }
+    }
+
     if (this.userLoginModal) {
       this.userLoginModal.style.display = 'flex';
       // NO SCROLL LOCK - body can scroll

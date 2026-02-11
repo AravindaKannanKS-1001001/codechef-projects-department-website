@@ -310,5 +310,10 @@ class AuthManager {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  new AuthManager();
+  // expose auth manager globally so other modules can interact with admin session
+  try {
+    window.authManager = new AuthManager();
+  } catch (e) {
+    console.error('Error initializing AuthManager', e);
+  }
 });

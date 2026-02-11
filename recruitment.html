@@ -48,7 +48,7 @@
     .recruitment-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--spacing-2xl);
+      gap: var(--spacing-lg);
       align-items: start;
     }
 
@@ -198,6 +198,9 @@
         animation: fadeInUp 0.8s ease-out;
       }
     }
+    /* Ensure navbar logo size and hover match homepage */
+    .navbar-logo .logo-img { height: 60px; width: auto; transition: all 0.25s ease; }
+    .navbar-logo:hover .logo-img { height: 70px; filter: drop-shadow(0 4px 8px rgba(255,107,53,0.4)); }
   </style>
 </head>
 
@@ -342,14 +345,20 @@
           </div>
 
           <div class="form-group">
-            <label for="portfolio">Portfolio / GitHub URL</label>
-            <input type="url" id="portfolio" name="portfolio" placeholder="https://github.com/yourprofile">
+            <label for="portfolio">Portfolio / GitHub URL *</label>
+            <input type="url" id="portfolio" name="portfolio" placeholder="https://github.com/yourprofile" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="linkedin">LinkedIn URL *</label>
+            <input type="url" id="linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/yourprofile" required>
           </div>
 
           <div class="form-group">
             <input type="submit" value="Submit Application">
           </div>
         </form>
+          <div id="bookingContainer" style="margin-top:1rem;"></div>
       </div>
 
       <div class="note-box">
@@ -399,9 +408,9 @@
           e.preventDefault();
           const formData = new FormData(recruitmentForm);
           const data = Object.fromEntries(formData);
-          
+
           console.log('Application submitted:', data);
-          
+
           // Show success message
           const successMsg = document.createElement('div');
           successMsg.style.cssText = `
@@ -428,14 +437,93 @@
           localStorage.setItem('applications', JSON.stringify(applications));
           
           recruitmentForm.reset();
-          
+          // If interview slots are available, show booking UI for applicant
           setTimeout(() => {
             successMsg.style.animation = 'slideInUp 0.4s ease-out forwards';
             setTimeout(() => successMsg.remove(), 400);
-          }, 3000);
+          }, 1500);
+
+          const interviewSlots = JSON.parse(localStorage.getItem('interviewSlots')) || [];
+          if (interviewSlots.length > 0) {
+            showInterviewBooking(data.email, interviewSlots);
+          }
         });
       }
     });
+
+    function showInterviewBooking(email, slots) {
+      const container = document.getElementById('bookingContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'background: var(--bg-tertiary); padding: 1rem; border-radius: 10px; border:1px solid var(--border-color);';
+      wrapper.innerHTML = `
+        <h3 style="margin-top:0; color: var(--text-primary);">Book Interview Slot</h3>
+        <p style="color: var(--text-secondary); margin:0 0 0.75rem 0;">Select a date and time for your interview from available slots.</p>
+        <div id="availableSlots" style="display:flex; flex-direction:column; gap:0.5rem; max-height:220px; overflow:auto;"></div>
+        <div style="margin-top:0.75rem; display:flex; gap:0.5rem;">
+          <button class="btn btn-primary" id="confirmBooking">Confirm Booking</button>
+          <button class="btn btn-secondary" id="cancelBooking">Cancel</button>
+        </div>
+        <div id="bookingMsg" style="margin-top:0.5rem; color: var(--text-secondary);"></div>
+      `;
+
+      container.appendChild(wrapper);
+
+      const list = wrapper.querySelector('#availableSlots');
+      const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+      slots.forEach((s, idx) => {
+        const taken = bookings.find(b => b.date === s.date && b.time === s.time);
+        const el = document.createElement('label');
+        el.style.cssText = 'display:flex; gap:0.5rem; align-items:center; padding:0.4rem; border-radius:6px; border:1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); justify-content: space-between;';
+        const left = document.createElement('div');
+        left.style.cssText = 'display:flex; gap:0.5rem; align-items:center; flex:1;';
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'slotSel';
+        radio.value = `${s.date}|${s.time}`;
+        radio.style.width = 'auto';
+        if (taken) radio.disabled = true;
+        left.appendChild(radio);
+        const text = document.createElement('div');
+        text.style.flex = '1';
+        text.textContent = `${s.date} @ ${s.time}`;
+        left.appendChild(text);
+        el.appendChild(left);
+
+        const right = document.createElement('div');
+        right.style.cssText = 'min-width:120px; text-align:right; color: var(--text-secondary);';
+        right.textContent = taken ? `Taken` : `Available`;
+        el.appendChild(right);
+
+        list.appendChild(el);
+      });
+
+      wrapper.querySelector('#cancelBooking').addEventListener('click', () => { container.innerHTML = ''; });
+
+      wrapper.querySelector('#confirmBooking').addEventListener('click', () => {
+        const sel = wrapper.querySelector('input[name="slotSel"]:checked');
+        const bookingMsg = wrapper.querySelector('#bookingMsg');
+        if (!sel) {
+          bookingMsg.textContent = 'Please select a slot.';
+          return;
+        }
+        const [date, time] = sel.value.split('|');
+        // Save booking
+        const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+        // prevent double booking for same slot
+        if (bookings.find(b => b.email === email && b.date === date && b.time === time)) {
+          bookingMsg.textContent = 'You already booked this slot.';
+          return;
+        }
+        bookings.push({ email, date, time, bookedAt: new Date().toISOString() });
+        localStorage.setItem('bookings', JSON.stringify(bookings));
+        bookingMsg.style.color = 'var(--accent-success)';
+        bookingMsg.textContent = `Booked: ${date} @ ${time}`;
+        setTimeout(() => { container.innerHTML = ''; }, 1500);
+      });
+    }
   </script>
   <script src="js/cursor.js"></script>
 </body>

@@ -368,4 +368,104 @@ document.addEventListener('DOMContentLoaded', () => {
   new ButtonAnimationManager();
   new FormAnimationManager();
   new PageLoadManager();
+  // Typing animation for hero code card
+  try { new TypingManager(); } catch (e) { /* ignore if missing */ }
 });
+
+// ============================================
+// TYPING MANAGER - types code lines in hero
+// ============================================
+class TypingManager {
+  constructor() {
+    this.el = document.querySelector('.code-output');
+    this.cursor = document.querySelector('.typing-cursor');
+    this.lines = [
+      "const Projects = {",
+      "  innovation: 'limitless',",
+      "  collaboration: 'essential',",
+      "  impact: 'global'",
+      "};"
+    ];
+    this.lineDelay = 600; // ms between lines
+    this.charDelay = 30; // ms between chars
+    this.restartDelay = 2000; // wait after full block
+    this._stopped = false;
+    if (this.el) this.start();
+  }
+
+  async start() {
+    while (!this._stopped) {
+      await this.typeBlock();
+      await this.wait(this.restartDelay);
+      await this.clearBlock();
+      await this.wait(600);
+    }
+  }
+
+  async typeBlock() {
+    // clear previous content
+    this.el.textContent = '';
+    // ensure no leftover anchor
+    const oldAnchor = this.el.querySelector('.caret-anchor');
+    if (oldAnchor) oldAnchor.remove();
+    for (let i = 0; i < this.lines.length; i++) {
+      await this.typeLine(this.lines[i]);
+      // add line break as a text node
+      this.el.appendChild(document.createTextNode('\n'));
+      await this.wait(this.lineDelay);
+    }
+  }
+
+  async typeLine(line) {
+    for (let i = 0; i < line.length; i++) {
+      const ch = line.charAt(i);
+      // append character as text node to preserve spacing in <pre>
+      this.el.appendChild(document.createTextNode(ch));
+      // ensure caret anchor exists at end
+      let anchor = this.el.querySelector('.caret-anchor');
+      if (!anchor) {
+        anchor = document.createElement('span');
+        anchor.className = 'caret-anchor';
+        anchor.style.display = 'inline-block';
+        anchor.style.width = '0px';
+        anchor.style.height = '1em';
+        this.el.appendChild(anchor);
+      } else {
+        // move it to end
+        this.el.appendChild(anchor);
+      }
+      this.updateCursorPosition();
+      await this.wait(this.charDelay + Math.random() * 40);
+    }
+  }
+
+  async clearBlock() {
+    // remove contents and anchor
+    const anchor = this.el.querySelector('.caret-anchor');
+    if (anchor) anchor.remove();
+    this.el.textContent = '';
+    this.updateCursorPosition();
+  }
+
+  updateCursorPosition() {
+    if (!this.cursor || !this.el) return;
+    const anchor = this.el.querySelector('.caret-anchor');
+    // default position: top-left inside code-card
+    const card = this.el.parentElement || this.el;
+    if (!anchor) {
+      // place cursor at start
+      this.cursor.style.left = '12px';
+      this.cursor.style.top = '12px';
+      return;
+    }
+    const anchorRect = anchor.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    // position cursor relative to the code-card container
+    const left = Math.max(8, anchorRect.left - cardRect.left + anchorRect.width);
+    const top = Math.max(8, anchorRect.top - cardRect.top);
+    this.cursor.style.left = left + 'px';
+    this.cursor.style.top = top + 'px';
+  }
+
+  wait(ms) { return new Promise((res) => setTimeout(res, ms)); }
+}
