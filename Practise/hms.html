@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hospital Management System</title>
+<style>
+body{
+    margin:0;
+}
+header{
+    height:60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: linear-gradient(to right, rgb(205, 240, 246), rgb(226, 226, 253));
+    padding:0px 10px;
+}
+#id1{
+    background-color:rgb(43,108,238);
+    padding:15px 15px;
+    border-radius:30px;
+    line-height:10%;
+    color:white;
+}
+.page{
+    display:flex;
+    background-color:rgb(15, 23, 42);
+    height:calc(100vh - 60px);
+}
+.page p{
+    color:white;
+    padding:10px;
+    background-color:rgb(30, 41, 59);
+    margin:10px 15px;
+    border-radius:10px;
+}
+.sidebar{
+    width:200px;
+}
+.content{
+    flex:1;
+}
+.content iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+#id2{
+margin-top:20px;
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+<h3 style="color:rgb(43,108,238);">🏥 MedCare Dashboard</h3>
+<p id="id1">Admin</p>
+</header>
+<div class="page">
+<div class="sidebar">
+<p id="id2">Overview</p>
+<p>Doctors</p>
+<p>Patients</p>
+<p>Appointments</p>
+<p>Emergency</p>
+<p>Reports</p>
+</div>
+<div class="content"><iframe src="content.html"></iframe></div>
+</div>
+</body>
+</html>
