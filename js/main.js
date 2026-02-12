@@ -159,6 +159,20 @@ handleNavClick(e) {
       members = appData.members[group].filter((m) => m.tenure === this.currentTenure);
     }
 
+    // Apply carousel mode for regular members with more than 10 members
+    if (group === 'members' && members.length > 10) {
+      container.classList.add('carousel-mode');
+    } else {
+      container.classList.remove('carousel-mode');
+    }
+
+    // Apply larger cards for leads
+    if (group === 'leads') {
+      container.classList.add('leads-grid');
+    } else {
+      container.classList.remove('leads-grid');
+    }
+
     container.innerHTML = members.map((member) => this.createMemberCard(member)).join('');
 
     // Reapply animations
@@ -205,6 +219,13 @@ handleNavClick(e) {
 
     if (filter !== 'all') {
       projects = projects.filter((p) => p.status === filter);
+    }
+
+    // Apply carousel mode if more than 3 projects
+    if (projects.length > 3) {
+      container.classList.add('carousel-mode');
+    } else {
+      container.classList.remove('carousel-mode');
     }
 
     container.innerHTML = projects.map((project) => this.createProjectCard(project)).join('');
@@ -267,14 +288,24 @@ handleNavClick(e) {
 
   createResearchCard(paper) {
     return `
-      <div class="card research-card">
-        <h3>${paper.title}</h3>
-        <p><strong>Authors:</strong> ${paper.authors}</p>
-        <p><strong>Publication:</strong> ${paper.publication} (${paper.year})</p>
-        <div style="display: flex; gap: 0.5rem;">
-          <a href="${paper.pdf}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">📄 PDF</a>
-          <a href="${paper.arxiv}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">📖 arXiv</a>
-          <a href="https://doi.org/${paper.doi}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">🔗 DOI</a>
+      <div class="card research-card" style="display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">${paper.title}</h3>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;"><strong>Authors:</strong> ${paper.authors}</p>
+            <p style="margin: 0.25rem 0 0 0; color: var(--text-secondary); font-size: 0.875rem;"><strong>Publication:</strong> ${paper.publication} (${paper.year})</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-direction: column; flex-shrink: 0;">
+            <a href="${paper.pdf}" target="_blank" rel="noopener noreferrer" title="View PDF" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: rgba(255, 107, 53, 0.15); color: var(--accent-primary); font-size: 1.2rem; text-decoration: none; transition: all 0.3s;">
+              📄
+            </a>
+            <a href="${paper.arxiv}" target="_blank" rel="noopener noreferrer" title="View arXiv" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: rgba(255, 107, 53, 0.15); color: var(--accent-primary); font-size: 1.2rem; text-decoration: none; transition: all 0.3s;">
+              📖
+            </a>
+            <a href="https://doi.org/${paper.doi}" target="_blank" rel="noopener noreferrer" title="View DOI" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: rgba(255, 107, 53, 0.15); color: var(--accent-primary); font-size: 1.2rem; text-decoration: none; transition: all 0.3s;">
+              🔗
+            </a>
+          </div>
         </div>
       </div>
     `;
@@ -324,46 +355,41 @@ handleNavClick(e) {
     let html = '';
 
     if (type === 'members') {
-      html = data.map((member, idx) => `
-        <div class="gamedev-card gamedev-member-card" style="animation-delay: ${idx * 0.1}s;">
-          <div class="gamedev-card-inner">
-            <div class="gamedev-card-avatar">
-              <img src="${member.photo}" alt="${member.name}" class="pfp" loading="lazy" onerror="this.src='https://via.placeholder.com/140/FF6B35/ffffff?text=${member.name.charAt(0)}'">
-              <div class="gamedev-card-overlay">
-                <span class="gamedev-badge">Developer</span>
-              </div>
-            </div>
-            <div class="gamedev-card-content">
-              <h3 class="gamedev-card-title">${member.name}</h3>
-              <p class="gamedev-card-role">Game Development</p>
-              <div class="gamedev-card-footer">
-                <span class="gamedev-card-stat">🎮 Active</span>
-              </div>
-            </div>
-          </div>
+      html = `
+        <div style="background: linear-gradient(135deg, var(--accent-primary-light), rgba(102, 126, 234, 0.1)); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-primary);">
+          <h3 style="margin-top: 0; color: var(--text-primary);">Game Development Team</h3>
+          <p style="color: var(--text-secondary); margin: 0;">Passionate developers creating innovative interactive experiences using cutting-edge game engines and technologies.</p>
         </div>
-      `).join('');
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+          ${data.map((member, idx) => `
+            <div class="card" style="animation-delay: ${idx * 0.1}s; text-align: center;">
+              <img src="${member.photo}" alt="${member.name}" class="pfp" style="margin-bottom: 1rem;" loading="lazy" onerror="this.src='https://via.placeholder.com/140/FF6B35/ffffff?text=${member.name.charAt(0)}'">
+              <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">${member.name}</h4>
+              <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">Game Developer</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
     } else if (type === 'projects') {
-      html = data.map((proj, idx) => `
-        <div class="gamedev-card gamedev-project-card" style="animation-delay: ${idx * 0.1}s;">
-          <div class="gamedev-card-header">
-            <span class="gamedev-project-icon">🎮</span>
-            <span class="gamedev-project-badge">Live</span>
-          </div>
-          <div class="gamedev-card-content">
-            <h3 class="gamedev-card-title">${proj.title}</h3>
-            <p class="gamedev-card-desc">Innovative game development project</p>
-            <div class="gamedev-card-actions">
-              <a href="${proj.link}" target="_blank" rel="noopener noreferrer" class="gamedev-btn gamedev-btn-primary">
-                <span>View on GitHub</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M7 17L17 7M17 7H7M17 7V17"></path>
-                </svg>
+      html = `
+        <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(102, 126, 234, 0.1)); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-info);">
+          <h3 style="margin-top: 0; color: var(--text-primary);">Featured Game Projects</h3>
+          <p style="color: var(--text-secondary); margin: 0;">Showcase of games and interactive experiences developed by the Game Development Wing.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+          ${data.map((proj, idx) => `
+            <div class="card" style="animation-delay: ${idx * 0.1}s;">
+              <div style="background: linear-gradient(135deg, var(--accent-info), var(--accent-primary)); padding: 2rem; border-radius: 0.75rem; text-align: center; margin-bottom: 1rem;">
+                <span style="font-size: 2.5rem; display: block;">🎮</span>
+              </div>
+              <h4 style="margin: 0 0 0.75rem 0; color: var(--text-primary);">${proj.title}</h4>
+              <a href="${proj.link}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width: 100%;">
+                View on GitHub ↗
               </a>
             </div>
-          </div>
+          `).join('')}
         </div>
-      `).join('');
+      `;
     } else if (type === 'tools') {
       const toolIcons = {
         'Unity': '🎮',
@@ -371,32 +397,42 @@ handleNavClick(e) {
         'Unreal Engine': '🚀',
         'Custom C++ Engine': '⚙️'
       };
-      html = data.map((tool, idx) => `
-        <div class="gamedev-card gamedev-tool-card gamedev-card-interactive" style="animation-delay: ${idx * 0.1}s;">
-          <div class="gamedev-tool-icon">${toolIcons[tool] || '🔧'}</div>
-          <h3 class="gamedev-card-title">${tool}</h3>
-          <div class="gamedev-card-hover-info">
-            <p style="font-size: 0.875rem; color: var(--text-secondary);">Professional development tool</p>
-          </div>
+      html = `
+        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(255, 107, 53, 0.1)); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-warning);">
+          <h3 style="margin-top: 0; color: var(--text-primary);">Development Tools & Engines</h3>
+          <p style="color: var(--text-secondary); margin: 0;">Professional-grade tools and engines used by our game development team.</p>
         </div>
-      `).join('');
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+          ${data.map((tool, idx) => `
+            <div class="card" style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; animation-delay: ${idx * 0.1}s;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">${toolIcons[tool] || '🔧'}</div>
+              <h4 style="margin: 0; color: var(--text-primary);">${tool}</h4>
+              <p style="color: var(--text-secondary); font-size: 0.825rem; margin: 0.5rem 0 0 0;">Professional Tool</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
     } else if (type === 'events') {
-      html = data.map((event, idx) => `
-        <div class="gamedev-card gamedev-event-card" style="animation-delay: ${idx * 0.1}s;">
-          <div class="gamedev-event-header">
-            <span class="gamedev-event-badge">Upcoming</span>
-          </div>
-          <div class="gamedev-card-content">
-            <h3 class="gamedev-card-title">${event.title}</h3>
-            <div class="gamedev-event-meta">
-              <span class="gamedev-event-date">📅 ${event.date}</span>
-            </div>
-            <div class="gamedev-event-footer">
-              <button class="gamedev-btn gamedev-btn-sm gamedev-btn-outline">Learn More</button>
-            </div>
-          </div>
+      html = `
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(102, 126, 234, 0.1)); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-success);">
+          <h3 style="margin-top: 0; color: var(--text-primary);">Game Dev Events & Workshops</h3>
+          <p style="color: var(--text-secondary); margin: 0;">Upcoming and recent events organized by the Game Development Wing.</p>
         </div>
-      `).join('');
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+          ${data.map((event, idx) => `
+            <div class="card" style="border-left: 4px solid var(--accent-success); animation-delay: ${idx * 0.1}s;">
+              <div style="background: linear-gradient(135deg, var(--accent-success), var(--accent-tertiary)); color: white; padding: 0.75rem 1rem; border-radius: 0.5rem; display: inline-block; margin-bottom: 1rem; font-size: 0.8rem; font-weight: 600;">
+                UPCOMING
+              </div>
+              <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">${event.title}</h4>
+              <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">📅 ${event.date}</span>
+              </p>
+              <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Learn More</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
 
     container.innerHTML = html;
@@ -422,23 +458,31 @@ handleNavClick(e) {
 
     if (type === 'leaderboard') {
       html = `
-        <div style="overflow-x: auto;">
-          <table style="width: 100%; border-collapse: collapse;">
+        <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+          <table style="max-width: 900px; width: 100%; border-collapse: collapse;">
             <thead>
-              <tr style="border-bottom: 2px solid var(--border-color);">
-                <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary);">Rank</th>
-                <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary);">Name</th>
-                <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary);">Points</th>
-                <th style="padding: 1rem; text-align: left; font-weight: 600; color: var(--text-primary);">Contributions</th>
+              <tr style="border-bottom: 3px solid var(--accent-primary);">
+                <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.975rem;">Rank</th>
+                <th style="padding: 1rem; text-align: left; font-weight: 700; color: var(--text-primary); font-size: 0.975rem;">Team Name</th>
+                <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.975rem;">Votes (0-50)</th>
+                <th style="padding: 1rem; text-align: center; font-weight: 700; color: var(--text-primary); font-size: 0.975rem;">Action</th>
               </tr>
             </thead>
             <tbody>
               ${data.map((entry) => `
-                <tr style="border-bottom: 1px solid var(--border-color);">
-                  <td style="padding: 1rem; color: var(--text-secondary);">#${entry.rank}</td>
-                  <td style="padding: 1rem; color: var(--text-primary);">${entry.name}</td>
-                  <td style="padding: 1rem;"><strong style="color: var(--accent-success);">${entry.points}</strong></td>
-                  <td style="padding: 1rem; color: var(--text-secondary);">${entry.contributions}</td>
+                <tr style="border-bottom: 1px solid var(--border-color); transition: all 0.2s; cursor: pointer;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='transparent'">
+                  <td style="padding: 1rem; text-align: center; color: var(--text-secondary); font-weight: 600;">#${entry.rank}</td>
+                  <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">${entry.teamName}</td>
+                  <td style="padding: 1rem; text-align: center;">
+                    <div style="display: inline-block; background: linear-gradient(90deg, var(--accent-success), var(--accent-primary)); color: white; padding: 0.35rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.875rem;">
+                      ${entry.votes}/50
+                    </div>
+                  </td>
+                  <td style="padding: 1rem; text-align: center;">
+                    <button class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="window.showTeamMembers('${entry.teamName}', ${JSON.stringify(entry.members)})">
+                      View Members
+                    </button>
+                  </td>
                 </tr>
               `).join('')}
             </tbody>
@@ -472,6 +516,52 @@ handleNavClick(e) {
 // INITIALIZE APPLICATION
 // ============================================
 
+// Dialog box helper function
+function showDialog(title, message, onConfirm = null) {
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay active';
+  overlay.innerHTML = `
+    <div class="dialog-box">
+      <h2>${title}</h2>
+      <p>${message}</p>
+      <div class="dialog-box-buttons">
+        <button class="btn btn-secondary" onclick="this.closest('.dialog-overlay').remove();">Cancel</button>
+        <button class="btn btn-primary" id="dialogConfirm">OK</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  overlay.querySelector('#dialogConfirm').addEventListener('click', () => {
+    overlay.remove();
+    if (onConfirm) onConfirm();
+  });
+  
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+// Show team members in dialog
+function showTeamMembers(teamName) {
+  const members = ['Member 1', 'Member 2', 'Member 3']; // Placeholder
+  let memberHTML = members.map(m => `<li style="margin: 0.5rem 0; color: var(--text-secondary);">✓ ${m}</li>`).join('');
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay active';
+  overlay.innerHTML = `
+    <div class="dialog-box" style="max-width: 600px;">
+      <h2>${teamName} - Members</h2>
+      <ul style="list-style: none; padding: 0; margin: 1rem 0;">${memberHTML}</ul>
+      <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 1rem 0 0 0;"><strong>Contributions:</strong> Code reviews, Feature development, Bug fixes</p>
+      <div class="dialog-box-buttons" style="margin-top: 1.5rem;">
+        <button class="btn btn-primary" onclick="this.closest('.dialog-overlay').remove();">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   new ThemeManager();
   new DepartmentPortal();
@@ -482,12 +572,10 @@ document.addEventListener('DOMContentLoaded', () => {
       joinBtn.addEventListener('click', (e) => {
         const current = JSON.parse(localStorage.getItem('currentUser') || 'null');
         if (current && current.role === 'admin') {
-          const ok = confirm('You are currently logged in as admin. Admins are already team members. Logout admin to apply as a user?');
-          if (!ok) {
-            e.preventDefault();
-          } else {
+          showDialog('Admin Session Active', 'You are currently logged in as admin. Admins are already team members. Logout admin to apply as a user?', () => {
             try { window.authManager && window.authManager.logout(); } catch(e){}
-          }
+          });
+          e.preventDefault();
         }
       }, { capture: true });
     }
@@ -497,12 +585,10 @@ document.addEventListener('DOMContentLoaded', () => {
       userLoginBtn.addEventListener('click', (e) => {
         const current = JSON.parse(localStorage.getItem('currentUser') || 'null');
         if (current && current.role === 'admin') {
-          const ok = confirm('You are logged in as admin. Logout admin session to open User Login?');
-          if (!ok) {
-            e.preventDefault();
-          } else {
+          showDialog('Admin Session Active', 'You are logged in as admin. Logout admin session to open User Login?', () => {
             try { window.authManager && window.authManager.logout(); } catch(e){}
-          }
+          });
+          e.preventDefault();
         }
       }, { capture: true });
     }

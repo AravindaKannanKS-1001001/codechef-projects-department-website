@@ -238,11 +238,11 @@ const appData = {
 
   questSystem: {
     leaderboard: [
-      { rank: 1, name: 'Aakash Kumar', points: 1250, contributions: 45 },
-      { rank: 2, name: 'Priya Sharma', points: 1100, contributions: 38 },
-      { rank: 3, name: 'Arjun Patel', points: 950, contributions: 32 },
-      { rank: 4, name: 'Zara Khan', points: 850, contributions: 28 },
-      { rank: 5, name: 'Rahul Singh', points: 750, contributions: 25 }
+      { rank: 1, teamName: 'Team Alpha', votes: 45, members: ['Aakash Kumar', 'Priya Sharma'], contributions: 45 },
+      { rank: 2, teamName: 'Team Beta', votes: 38, members: ['Arjun Patel', 'Zara Khan'], contributions: 38 },
+      { rank: 3, teamName: 'Team Gamma', votes: 32, members: ['Rahul Singh', 'Neha Verma'], contributions: 32 },
+      { rank: 4, teamName: 'Team Delta', votes: 28, members: ['Amit Desai', 'Sophia Lee'], contributions: 28 },
+      { rank: 5, teamName: 'Team Epsilon', votes: 25, members: ['Vikram Rao', 'Emma Wilson'], contributions: 25 }
     ],
     contributions: [
       { user: 'Aakash Kumar', contribution: 'Completed AI module for code review', date: '2024-03-15', points: 50 },
@@ -250,8 +250,8 @@ const appData = {
       { user: 'Arjun Patel', contribution: 'Implemented API endpoints', date: '2024-03-13', points: 45 }
     ],
     winners: [
-      { month: 'March 2024', winner: 'Aakash Kumar', reward: 'CodeChef Goodies + Certificate' },
-      { month: 'February 2024', winner: 'Priya Sharma', reward: 'CodeChef Goodies + Certificate' }
+      { month: 'March 2024', winner: 'Team Alpha', reward: 'CodeChef Goodies + Certificate' },
+      { month: 'February 2024', winner: 'Team Beta', reward: 'CodeChef Goodies + Certificate' }
     ]
   }
 };

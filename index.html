@@ -372,7 +372,9 @@
 
   <span id="userProfile" style="color: var(--text-primary); font-weight:500;"></span>
 
-  <button class="btn btn-primary" id="loginBtn">🔐 Admin</button>
+  <button class="btn btn-primary" id="loginBtn">
+    <span id="adminStatusIcon">🔒</span> Admin
+  </button>
 
 </div>
 
@@ -562,10 +564,11 @@
 
         <div id="questDisplay" class="quest-content"></div>
       </section>
-
+      <!--
       <p>24BCE5021 - V.P.Shrinikhaythan</p>
       <br>
       <p> 24BCE5362 - Balashanmugam K</p>
+      -->
       <!-- FOOTER -->
 <!-- ============================================
      PROFESSIONAL FOOTER WITH SOCIAL MEDIA
@@ -616,11 +619,19 @@
         <h3 class="footer-heading">Quick Links</h3>
         <ul class="footer-links">
           <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
           <li><a href="#people">Our Team</a></li>
           <li><a href="#projects">Projects</a></li>
           <li><a href="#research">Research</a></li>
           <li><a href="#achievements">Achievements</a></li>
         </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3 class="footer-heading">About Us</h3>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+          The Projects Department at CodeChef VIT Chennai is a vibrant community dedicated to building real-world applications, conducting cutting-edge research, and fostering collaborative software development. We empower developers to create innovative solutions and contribute to meaningful projects.
+        </p>
       </div>
 
       <div class="footer-column">
@@ -961,6 +972,86 @@
         eyeIcon.style.display = 'block';
         eyeOffIcon.style.display = 'none';
       }
+    }
+    
+    // Team members modal
+    function showTeamMembers(teamName, members) {
+      const modal = document.createElement('div');
+      modal.id = 'teamMembersModal';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9998;
+      `;
+      
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: var(--bg-primary);
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 70vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      `;
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '&times;';
+      closeBtn.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 30px;
+        cursor: pointer;
+        color: var(--text-secondary);
+      `;
+      closeBtn.onclick = () => modal.remove();
+      
+      modalContent.appendChild(closeBtn);
+      
+      const title = document.createElement('h2');
+      title.textContent = teamName;
+      title.style.color = 'var(--text-primary)';
+      title.style.marginTop = '0';
+      modalContent.appendChild(title);
+      
+      const membersList = document.createElement('div');
+      membersList.style.cssText = 'margin-top: 1.5rem;';
+      
+      members.forEach((member, idx) => {
+        const memberDiv = document.createElement('div');
+        memberDiv.style.cssText = `
+          padding: 1rem;
+          background: var(--bg-secondary);
+          border-radius: 8px;
+          margin-bottom: 0.75rem;
+          border-left: 4px solid var(--accent-primary);
+        `;
+        memberDiv.innerHTML = `
+          <strong style="color: var(--text-primary);">${member}</strong><br>
+          <small style="color: var(--text-secondary);">Team Member #${idx + 1}</small>
+        `;
+        membersList.appendChild(memberDiv);
+      });
+      
+      modalContent.appendChild(membersList);
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
     }
   </script>
 

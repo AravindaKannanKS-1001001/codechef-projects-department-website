@@ -393,6 +393,50 @@ class TypingManager {
     if (this.el) this.start();
   }
 
+  // Color mapping for syntax highlighting
+  getColorForToken(token) {
+    if (/^const|let|var$/.test(token)) return '#ec2395'; // pink for keywords
+    if (/^[A-Z]/.test(token)) return '#45d9fa'; // light blue for class/var names
+    if (/^[a-z_]/.test(token)) return '#00ff88'; // green for properties
+    if (/^['"]/.test(token)) return '#ffa500'; // orange for strings
+    return '#ffffff'; // white for default
+  }
+
+  tokenizeLine(line) {
+    const tokens = [];
+    let current = '';
+    let inString = false;
+    let stringChar = '';
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+
+      // Handle strings
+      if ((char === '"' || char === "'") && !inString) {
+        if (current) tokens.push({ text: current, color: this.getColorForToken(current) });
+        current = '';
+        inString = true;
+        stringChar = char;
+        current += char;
+      } else if (char === stringChar && inString && line[i - 1] !== '\\') {
+        current += char;
+        tokens.push({ text: current, color: '#ffa500' });
+        current = '';
+        inString = false;
+      } else if (inString) {
+        current += char;
+      } else if (/[\s:{}[\]=,;]/.test(char)) {
+        if (current) tokens.push({ text: current, color: this.getColorForToken(current) });
+        tokens.push({ text: char, color: '#8c00ff' });
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current) tokens.push({ text: current, color: this.getColorForToken(current) });
+    return tokens;
+  }
+
   async start() {
     while (!this._stopped) {
       await this.typeBlock();
@@ -417,25 +461,36 @@ class TypingManager {
   }
 
   async typeLine(line) {
-    for (let i = 0; i < line.length; i++) {
-      const ch = line.charAt(i);
-      // append character as text node to preserve spacing in <pre>
-      this.el.appendChild(document.createTextNode(ch));
-      // ensure caret anchor exists at end
-      let anchor = this.el.querySelector('.caret-anchor');
-      if (!anchor) {
-        anchor = document.createElement('span');
-        anchor.className = 'caret-anchor';
-        anchor.style.display = 'inline-block';
-        anchor.style.width = '0px';
-        anchor.style.height = '1em';
-        this.el.appendChild(anchor);
-      } else {
-        // move it to end
-        this.el.appendChild(anchor);
+    const tokens = this.tokenizeLine(line);
+    
+    for (let tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+      const token = tokens[tokenIndex];
+      
+      for (let charIndex = 0; charIndex < token.text.length; charIndex++) {
+        const char = token.text[charIndex];
+        
+        // Create span for colored character
+        const charSpan = document.createElement('span');
+        charSpan.style.color = token.color;
+        charSpan.textContent = char;
+        this.el.appendChild(charSpan);
+        
+        // ensure caret anchor exists at end
+        let anchor = this.el.querySelector('.caret-anchor');
+        if (!anchor) {
+          anchor = document.createElement('span');
+          anchor.className = 'caret-anchor';
+          anchor.style.display = 'inline-block';
+          anchor.style.width = '0px';
+          anchor.style.height = '1em';
+          this.el.appendChild(anchor);
+        } else {
+          // move it to end
+          this.el.appendChild(anchor);
+        }
+        this.updateCursorPosition();
+        await this.wait(this.charDelay + Math.random() * 40);
       }
-      this.updateCursorPosition();
-      await this.wait(this.charDelay + Math.random() * 40);
     }
   }
 
@@ -450,21 +505,36 @@ class TypingManager {
   updateCursorPosition() {
     if (!this.cursor || !this.el) return;
     const anchor = this.el.querySelector('.caret-anchor');
-    // default position: top-left inside code-card
     const card = this.el.parentElement || this.el;
+    
     if (!anchor) {
       // place cursor at start
       this.cursor.style.left = '12px';
       this.cursor.style.top = '12px';
       return;
     }
-    const anchorRect = anchor.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    // position cursor relative to the code-card container
-    const left = Math.max(8, anchorRect.left - cardRect.left + anchorRect.width);
-    const top = Math.max(8, anchorRect.top - cardRect.top);
-    this.cursor.style.left = left + 'px';
-    this.cursor.style.top = top + 'px';
+
+    // Use requestAnimationFrame for smooth cursor movement
+    requestAnimationFrame(() => {
+      const anchorRect = anchor.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      
+      // Calculate position with precise offset
+      const left = Math.max(8, anchorRect.left - cardRect.left + anchorRect.width);
+      const top = Math.max(8, anchorRect.top - cardRect.top);
+      
+      // Use transform for better performance (GPU accelerated)
+      //this.cursor.style.transform = `translate(${left}px, ${top}px)`;
+      
+      // Keep left/top for compatibility
+      this.cursor.style.left = left + 'px';
+      this.cursor.style.top = top + 'px';
+      
+      // Ensure cursor is visible
+      if (this.cursor.style.opacity === '0') {
+        this.cursor.style.opacity = '1';
+      }
+    });
   }
 
   wait(ms) { return new Promise((res) => setTimeout(res, ms)); }

@@ -10,11 +10,118 @@
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/cursor.css">
   <link rel="icon" type="image/svg+xml" href="assets/cc.svg">
+  <script>
+    // Check if user is logged in - show dialog immediately if not
+    (function() {
+      const currentUser = localStorage.getItem('currentUser');
+      
+      if (!currentUser) {
+        // Show dialog as soon as page loads (don't wait for DOMContentLoaded)
+        function showLoginDialog() {
+          // Create modal overlay
+          const modal = document.createElement('div');
+          modal.id = 'loginRequiredModal';
+          modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+          `;
+          
+          const modalContent = document.createElement('div');
+          modalContent.style.cssText = `
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+          `;
+          
+          const closeBtn = document.createElement('button');
+          closeBtn.textContent = '×';
+          closeBtn.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 35px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+          `;
+          closeBtn.onmouseover = () => closeBtn.style.color = 'var(--accent-primary)';
+          closeBtn.onmouseout = () => closeBtn.style.color = 'var(--text-secondary)';
+          closeBtn.onclick = () => {
+            modal.remove();
+          };
+          
+          modalContent.appendChild(closeBtn);
+          
+          const title = document.createElement('h2');
+          title.textContent = '🔐 Login Required';
+          title.style.cssText = 'margin-top: 0; color: var(--accent-primary); font-size: 1.5rem;';
+          modalContent.appendChild(title);
+          
+          const desc = document.createElement('p');
+          desc.textContent = 'You need to be logged in to view the recruitment form.';
+          desc.style.cssText = 'color: var(--text-secondary); margin: 15px 0; font-size: 1rem;';
+          modalContent.appendChild(desc);
+          
+          const loginLink = document.createElement('a');
+          loginLink.href = 'index.html#home';
+          loginLink.textContent = 'Go to Home & Login';
+          loginLink.style.cssText = `
+            display: inline-block;
+            background: var(--accent-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 15px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+          `;
+          loginLink.onmouseover = () => loginLink.style.opacity = '0.9';
+          loginLink.onmouseout = () => loginLink.style.opacity = '1';
+          modalContent.appendChild(loginLink);
+          
+          modal.appendChild(modalContent);
+          document.body.appendChild(modal);
+          
+          // Blur the page content
+          const recruitmentPage = document.querySelector('.recruitment-page');
+          if (recruitmentPage) {
+            recruitmentPage.style.filter = 'blur(8px)';
+            recruitmentPage.style.pointerEvents = 'none';
+            recruitmentPage.style.transition = 'filter 0.3s ease';
+          }
+        }
+        
+        // Show dialog when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', showLoginDialog);
+        } else {
+          showLoginDialog();
+        }
+      }
+    })();
+  </script>
   <style>
     .recruitment-page {
       min-height: 100vh;
       background: var(--bg-primary);
-      padding-top: 100px;
+      padding-top: var(--spacing-xl);
     }
 
     .recruitment-wrapper {
@@ -25,7 +132,7 @@
 
     .recruitment-header {
       text-align: center;
-      margin-bottom: var(--spacing-3xl);
+      margin-bottom: var(--spacing-lg);
       animation: fadeInUp 0.8s ease-out;
     }
 
@@ -35,14 +142,14 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
     }
 
     .recruitment-header p {
       font-size: var(--font-size-lg);
       color: var(--text-secondary);
       max-width: 600px;
-      margin: 0 auto var(--spacing-2xl);
+      margin: 0 auto var(--spacing-lg);
     }
 
     .recruitment-container {
@@ -318,6 +425,8 @@
               <option value="6">6th Semester</option>
               <option value="7">7th Semester</option>
               <option value="8">8th Semester</option>
+              <option value="9">9th Semester</option>
+              <option value="10">10th Semester</option>
             </select>
           </div>
 
