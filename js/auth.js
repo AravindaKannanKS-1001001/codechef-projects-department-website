@@ -193,13 +193,58 @@ class AuthManager {
 
   openAdminPanel() {
     console.log('openAdminPanel called', { currentUser: this.currentUser });
+    
+    // Check if a regular user is logged in
+    const current = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if (current && current.role === 'user') {
+      this.showUserLogoutConfirmPopup();
+      return;
+    }
+    
     if (!this.currentUser) {
       console.log('No current user - opening login');
       this.openLogin();
-    } else {
-      console.log('User already logged in - opening admin panel');
+    } else if (this.currentUser.role === 'admin') {
+      console.log('Admin already logged in - opening admin panel');
       this.openAdmin();
     }
+  }
+
+  showUserLogoutConfirmPopup() {
+    // Create custom popup for user to logout before admin login
+    const popup = document.createElement('div');
+    popup.className = 'logout-confirm-popup';
+    popup.innerHTML = `
+      <div class="logout-popup-overlay"></div>
+      <div class="logout-popup-content">
+        <h3>Switch to Admin Login</h3>
+        <p>You are currently logged in as a user. Please logout first to access the admin panel.</p>
+        <div class="logout-popup-buttons">
+          <button class="btn btn-secondary logout-popup-cancel">Cancel</button>
+          <button class="btn btn-danger logout-popup-confirm">Logout & Continue</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    const cancelBtn = popup.querySelector('.logout-popup-cancel');
+    const confirmBtn = popup.querySelector('.logout-popup-confirm');
+    
+    const closePopup = () => popup.remove();
+    
+    cancelBtn.addEventListener('click', closePopup);
+    confirmBtn.addEventListener('click', () => {
+      closePopup();
+      // Logout the user
+      localStorage.removeItem('currentUser');
+      this.currentUser = null;
+      this.showNotification('✓ User logged out. Now you can login as admin.', 'success');
+      // Open admin login after logout
+      setTimeout(() => this.openLogin(), 300);
+    });
+    
+    popup.querySelector('.logout-popup-overlay').addEventListener('click', closePopup);
   }
 
   openLogin() {

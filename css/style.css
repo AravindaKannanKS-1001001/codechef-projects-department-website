@@ -1889,6 +1889,21 @@ a:hover, button:hover {
   backdrop-filter: blur(5px);
 }
 
+/* Ensure cursor is visible on modals */
+.modal .cursor,
+.modal .cursor-arrow,
+.modal .cursor-dot {
+  z-index: 99999 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none;
+}
+
+/* Prevent modal elements from hiding cursor */
+.modal * {
+  z-index: auto;
+}
+
 .login-container {
   width: 100%;
   max-width: 450px;
