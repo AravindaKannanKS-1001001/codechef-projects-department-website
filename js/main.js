@@ -517,6 +517,13 @@ handleNavClick(e) {
     container.addEventListener('mouseenter', stopAutoScroll, { passive: true });
     container.addEventListener('mouseleave', startAutoScroll, { passive: true });
 
+    // Pause when hovering individual cards (magnify effect)
+    const cards = container.querySelectorAll('.card');
+    cards.forEach((card) => {
+      card.addEventListener('mouseenter', stopAutoScroll, { passive: true });
+      card.addEventListener('mouseleave', startAutoScroll, { passive: true });
+    });
+
     // Start carousel immediately - no delay for constant animation
     container._autoScrollAnimationId = requestAnimationFrame(performAutoScroll);
   }
@@ -615,12 +622,16 @@ handleNavClick(e) {
       return type === 'past' ? bDate - aDate : aDate - bDate;
     });
 
+    // Reset carousel setup flag to allow reinitialization
+    container.dataset.carouselSetup = '';
+
     if (filteredEvents.length === 0) {
+      container.classList.remove('carousel-mode');
       container.innerHTML = `<div class="card" style="text-align: center; padding: 3rem; grid-column: 1 / -1;">No ${type} events</div>`;
       return;
     }
 
-    container.innerHTML = filteredEvents.map((event) => {
+    const cardsHTML = filteredEvents.map((event) => {
       const eventDate = new Date(event.date);
       const isUpcoming = eventDate >= today;
       const daysDiff = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
@@ -645,6 +656,16 @@ handleNavClick(e) {
         </div>
       </div>`;
     }).join('');
+
+    // Apply carousel mode if more than 3 events
+    if (filteredEvents.length > 3) {
+      container.classList.add('carousel-mode');
+      container.innerHTML = cardsHTML + cardsHTML + cardsHTML;
+      this.setupCarouselAutoScroll(container);
+    } else {
+      container.classList.remove('carousel-mode');
+      container.innerHTML = cardsHTML;
+    }
   }
 }
 

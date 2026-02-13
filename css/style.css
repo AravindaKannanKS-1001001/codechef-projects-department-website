@@ -977,6 +977,40 @@ a:hover, button:hover {
   min-width: 320px;
 }
 
+.projects-grid.carousel-mode .card:hover {
+  transform: translateY(-8px) scale(1.04);
+  z-index: 2;
+}
+
+/* Carousel mode for events with many items */
+.events-grid.carousel-mode {
+  display: flex;
+  overflow-x: auto;
+  gap: var(--spacing-lg);
+  padding-bottom: 1rem;
+  scroll-behavior: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.events-grid.carousel-mode::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.events-grid.carousel-mode .card {
+  flex: 0 0 320px;
+  min-width: 320px;
+}
+
+.events-grid.carousel-mode .card:hover {
+  transform: translateY(-8px) scale(1.04);
+  z-index: 2;
+}
+
 /* Carousel mode for research with many items */
 .research-grid.carousel-mode {
   display: flex;
@@ -2610,6 +2644,7 @@ a:hover, button:hover {
 
   /* Carousel responsive adjustments for tablet */
   .projects-grid.carousel-mode .card,
+  .events-grid.carousel-mode .card,
   #memberDisplay.carousel-mode .member-card {
     min-width: 280px;
     flex: 0 0 280px;
@@ -2680,6 +2715,7 @@ a:hover, button:hover {
 
   /* Carousel responsive for mobile - smaller cards */
   .projects-grid.carousel-mode .card,
+  .events-grid.carousel-mode .card,
   #memberDisplay.carousel-mode .member-card {
     min-width: 240px;
     flex: 0 0 240px;
