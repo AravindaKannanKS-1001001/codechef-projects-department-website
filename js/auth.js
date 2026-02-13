@@ -13,18 +13,46 @@ class AuthManager {
     this.closeAdminModal = document.getElementById('closeAdminModal');
     this.adminLogout = document.getElementById('adminLogout');
     this.currentUser = null;
-    this.admins = [
+    
+    // Load admins from localStorage or initialize with defaults
+    this.admins = this.loadAdmins();
+
+    this.init();
+  }
+
+  loadAdmins() {
+    const storedAdmins = localStorage.getItem('adminAccounts');
+    if (storedAdmins) {
+      try {
+        return JSON.parse(storedAdmins);
+      } catch (e) {
+        console.error('Error parsing admin accounts:', e);
+      }
+    }
+    
+    // Default admin accounts
+    const defaultAdmins = [
       {
         email: 'admin@codechef-projects.com',
-        password: 'Admin@123'
+        password: 'Admin@123',
+        createdAt: new Date().toISOString(),
+        role: 'super-admin'
       },
       {
         email: 'lead@codechef-projects.com',
-        password: 'Lead@123'
+        password: 'Lead@123',
+        createdAt: new Date().toISOString(),
+        role: 'admin'
       }
     ];
+    
+    // Save default admins to localStorage
+    localStorage.setItem('adminAccounts', JSON.stringify(defaultAdmins));
+    return defaultAdmins;
+  }
 
-    this.init();
+  saveAdmins() {
+    localStorage.setItem('adminAccounts', JSON.stringify(this.admins));
   }
 
   init() {
@@ -323,6 +351,72 @@ class AuthManager {
       notification.style.animation = 'slideInUp 0.4s ease-out reverse';
       setTimeout(() => notification.remove(), 400);
     }, 3000);
+  }
+
+  // Admin account management methods
+  addAdminAccount(email, password) {
+    // Check if admin already exists
+    if (this.admins.find(a => a.email === email)) {
+      return { success: false, message: 'Admin email already exists.' };
+    }
+
+    // Validate password strength
+    const validation = PasswordValidator.validatePassword(password);
+    if (!validation.isValid) {
+      return { success: false, message: 'Password does not meet security requirements.' };
+    }
+
+    const newAdmin = {
+      email: email,
+      password: password, // In production, hash this
+      createdAt: new Date().toISOString(),
+      role: 'admin'
+    };
+
+    this.admins.push(newAdmin);
+    this.saveAdmins();
+    
+    return { success: true, message: 'Admin account created successfully.' };
+  }
+
+  deleteAdminAccount(email) {
+    // Prevent deletion of super admin
+    const admin = this.admins.find(a => a.email === email);
+    if (admin && admin.role === 'super-admin') {
+      return { success: false, message: 'Cannot delete super admin account.' };
+    }
+
+    this.admins = this.admins.filter(a => a.email !== email);
+    this.saveAdmins();
+    
+    return { success: true, message: 'Admin account deleted successfully.' };
+  }
+
+  updateAdminPassword(email, newPassword) {
+    // Validate password strength
+    const validation = PasswordValidator.validatePassword(newPassword);
+    if (!validation.isValid) {
+      return { success: false, message: 'Password does not meet security requirements.' };
+    }
+
+    const admin = this.admins.find(a => a.email === email);
+    if (!admin) {
+      return { success: false, message: 'Admin account not found.' };
+    }
+
+    admin.password = newPassword;
+    admin.updatedAt = new Date().toISOString();
+    this.saveAdmins();
+    
+    return { success: true, message: 'Password updated successfully.' };
+  }
+
+  getAdminAccounts() {
+    return this.admins.map(a => ({
+      email: a.email,
+      createdAt: a.createdAt,
+      role: a.role
+    }));
   }
 }
 

@@ -1627,6 +1627,243 @@ a:hover, button:hover {
 }
 
 /* ============================================
+   PASSWORD STRENGTH INDICATOR
+   ============================================ */
+
+.password-strength-container {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.password-strength-meter {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.password-strength-bar {
+  flex: 1;
+  height: 100%;
+  background: var(--border-color);
+  border-radius: 2px;
+  transition: all var(--transition-base);
+}
+
+/* Strength Colors */
+.password-strength-weak .password-strength-bar {
+  background: #ef4444;
+}
+
+.password-strength-weak .password-strength-bar:nth-child(1) {
+  background: #ef4444;
+}
+
+.password-strength-fair .password-strength-bar:nth-child(1),
+.password-strength-fair .password-strength-bar:nth-child(2) {
+  background: #f59e0b;
+}
+
+.password-strength-good .password-strength-bar:nth-child(1),
+.password-strength-good .password-strength-bar:nth-child(2),
+.password-strength-good .password-strength-bar:nth-child(3) {
+  background: #eab308;
+}
+
+.password-strength-strong .password-strength-bar {
+  background: #10b981;
+}
+
+/* Strength Text */
+.password-strength-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.password-strength-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.password-strength-value {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.password-strength-value.weak {
+  color: #ef4444;
+}
+
+.password-strength-value.fair {
+  color: #f59e0b;
+}
+
+.password-strength-value.good {
+  color: #eab308;
+}
+
+.password-strength-value.strong {
+  color: #10b981;
+}
+
+/* Requirements Checklist */
+.password-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.requirement-item.met {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-weight: 600;
+}
+
+.requirement-item.unmet {
+  background: rgba(239, 68, 68, 0.05);
+  color: var(--text-secondary);
+}
+
+.requirement-icon {
+  font-size: var(--font-size-xs);
+  min-width: 16px;
+}
+
+.requirement-icon.check {
+  color: #10b981;
+}
+
+.requirement-icon.cross {
+  color: #ef4444;
+}
+
+/* Feedback Messages */
+.password-feedback {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: #fee2e2;
+  border-left: 4px solid #ef4444;
+  border-radius: var(--radius-md);
+  color: #991b1b;
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.password-feedback.hidden {
+  display: none;
+}
+
+.password-feedback ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-feedback li {
+  margin: var(--spacing-xs) 0;
+}
+
+.password-feedback li::before {
+  content: '• ';
+  font-weight: bold;
+}
+
+/* Success State */
+.password-feedback.success {
+  background: #dcfce7;
+  border-left-color: #10b981;
+  color: #166534;
+}
+
+.password-feedback.success li::before {
+  content: '✓ ';
+}
+
+/* Match Indicator */
+.password-match-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  display: none;
+}
+
+.password-match-status.shown {
+  display: flex;
+}
+
+.password-match-status.match {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-weight: 600;
+}
+
+.password-match-status.mismatch {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.password-match-icon {
+  font-size: var(--font-size-base);
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+  .password-feedback {
+    background: #7f1d1d;
+    color: #fecaca;
+  }
+
+  .password-feedback.success {
+    background: #083d11;
+    color: #dcfce7;
+  }
+
+  .requirement-item {
+    background: var(--bg-tertiary);
+  }
+
+  .requirement-item.met {
+    background: rgba(16, 185, 129, 0.2);
+  }
+
+  .requirement-item.unmet {
+    background: rgba(239, 68, 68, 0.1);
+  }
+}
+
+/* ============================================
    MODALS - HIDE BY DEFAULT
    ============================================ */
 
